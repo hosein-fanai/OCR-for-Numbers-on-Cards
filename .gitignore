@@ -1,0 +1,12 @@
+__pycache__
+.ipynb_checkpoints
+
+dataset
+models
+logs
+
+templates
+
+*.pdf
+*.docx
+*.zip
