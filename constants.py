@@ -17,12 +17,12 @@ batch_size = 64
 lr = 1e-3
 reg_coef = 4e-4
 dropout_rate = 0.5
-class_weights_obj = 1. # float(window_size[0] * window_size[1])
+# class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
 threshold_conf = 0.5
 # threshold_nms = 0.5
 
-num_generating = 200_000
+num_generating = 100_000
 generating_index = 0
 
 num_processes = multiprocessing.cpu_count()

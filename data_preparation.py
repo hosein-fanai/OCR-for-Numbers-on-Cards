@@ -36,6 +36,13 @@ def extract_annotation(annot_path):
     classes_list = [classes_dict[key] for key in classes_dict.keys()]
     normed_windowed_bboxes_list = [normed_windowed_bboxes[key] for key in normed_windowed_bboxes.keys()]
 
+    # cvv2, exp_date = info
+    # cvv2 = [int(digit) for digit in cvv2]
+    # exp_date = [int(digit) for digit in exp_date]
+    # if len(exp_date) < 8:
+    #     exp_date = [0, 0, 0, 0] + exp_date
+    # info = cvv2, exp_date
+
     return confs, normed_windowed_bboxes_list, classes_list, card_type, info
 
 

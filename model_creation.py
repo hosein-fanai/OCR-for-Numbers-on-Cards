@@ -3,7 +3,7 @@ from tensorflow.keras import layers, models, optimizers, applications
 from tensorflow.keras import backend as K
 
 from ocr_model import OCRModel
-from constants import input_shape, dropout_rate, num_anchors, num_classes, model_name, lr, reg_coef
+from constants import input_shape, dropout_rate, num_anchors, num_classes, model_name, lr, reg_coef, model_path
 
 
 def create_sliding_window_ocr_model():
@@ -15,28 +15,28 @@ def create_sliding_window_ocr_model():
         layer.trainable = False
 
     input_image = layers.Input(shape=input_shape, dtype=tf.uint8, name="image")
-    
+
     x = models.Sequential([
-        layers.RandomBrightness(0.2),
-        layers.RandomContrast(0.2),
-    ], name="data_augmentation_layer")(input_image)
+        layers.RandomBrightness(0.5),
+        layers.RandomContrast(0.5),
+    ], name="data_augmentation")(input_image)
 
     x = layers.Lambda(lambda X: applications.xception.preprocess_input(X), name="xception_preprocess")(x)
 
     x = conv_base(x)
 
 
-    z = layers.GlobalAveragePooling2D()(x)
+    # z = layers.GlobalAveragePooling2D()(x)
 
-    z = layers.Dense(1024, activation="relu", name="bottleneck_dense_1")(z)
-    z = layers.Dropout(dropout_rate, name="bottleneck_do_1")(z)
+    # z1 = layers.Dense(1024, activation="relu", name="bottleneck_digits_dense_1")(z)
+    # z1 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_1")(z1)
 
-    z = layers.Dense(512, activation="relu", name="bottleneck_dense_2")(z)
-    z = layers.Dropout(dropout_rate, name="bottleneck_do_2")(z)
+    # z1 = layers.Dense(512, activation="relu", name="bottleneck_digits_dense_2")(z1)
+    # z1 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_2")(z1)
 
-    card_type = layers.Dense(1, activation="sigmoid", name="card_type")(z)
-    # cvv2 = layers.Dense(1, activation="linear", name="cvv2")(z)
-    # exp_date = layers.Dense(1, activation="linear", name="exp_date")(z)
+    # card_type = layers.Dense(1, activation="sigmoid", name="card_type")(z)
+    # cvv2_outputs = [layers.Dense(10, activation="softmax", name=f"cvv2_digit_{i}")(z1) for i in range(4)]
+    # exp_date_outputs = [layers.Dense(10, activation="softmax", name=f"exp_date_digit_{i}")(z1) for i in range(8)]
 
 
     x = layers.MaxPooling2D()(x)
@@ -50,7 +50,7 @@ def create_sliding_window_ocr_model():
     x1 = layers.BatchNormalization(name="bboxes_anchors_bottleneck_bn_2")(x1)
     x1 = layers.ReLU(name="bboxes_anchors_bottleneck_relu_2")(x1) 
 
-    confs_outputs = [layers.SeparableConv2D(1, kernel_size=1, padding="same", activation="sigmoid", name=f"confs_anchor_{i}")(x) for i in range(num_anchors)] 
+    confs_outputs = [layers.SeparableConv2D(1, kernel_size=1, padding="same", activation="sigmoid", name=f"confs_anchor_{i}")(x) for i in range(num_anchors)]
     bboxes_outputs = [layers.SeparableConv2D(4, kernel_size=1, padding="same", activation="linear", name=f"bboxes_anchor_{i}")(x1) for i in range(num_anchors)]
     classes_outputs = [layers.SeparableConv2D(num_classes, kernel_size=1, padding="same", activation="softmax", name=f"classes_anchor_{i}")(x) for i in range(num_anchors)]
 
@@ -61,9 +61,9 @@ def create_sliding_window_ocr_model():
             **{f"confs_anchor_{i}": confs_outputs[i] for i in range(num_anchors)}, 
             **{f"bboxes_anchor_{i}": bboxes_outputs[i] for i in range(num_anchors)},
             **{f"classes_anchor_{i}": classes_outputs[i] for i in range(num_anchors)},
-            "card_type": card_type,
-            # "cvv2": cvv2,
-            # "exp_date": exp_date
+            # "card_type": card_type,
+            # **{f"cvv2_digit_{i}": cvv2_outputs[i] for i in range(4)}, 
+            # **{f"exp_date_digit_{i}": exp_date_outputs[i] for i in range(8)}, 
         }, 
         name=model_name
     )
@@ -73,31 +73,35 @@ def create_sliding_window_ocr_model():
         optimizer=optimizers.Adam(learning_rate=lr, decay=reg_coef), 
         loss={
             **{f"confs_anchor_{i}": "binary_crossentropy" for i in range(num_anchors)},
-            **{f"bboxes_anchor_{i}": "mean_squared_error" for i in range(num_anchors)},
+            **{f"bboxes_anchor_{i}": "mse" for i in range(num_anchors)},
             **{f"classes_anchor_{i}": "sparse_categorical_crossentropy" for i in range(num_anchors)},
-            "card_type": "binary_crossentropy", 
-            # "cvv2": "mean_squared_error", 
-            # "exp_date": "mean_squared_error",
+            # "card_type": "binary_crossentropy", 
+            # **{f"cvv2_digit_{i}": "sparse_categorical_crossentropy" for i in range(4)}, 
+            # **{f"exp_date_digit_{i}": "sparse_categorical_crossentropy" for i in range(8)}, 
         },
         metrics={
             **{f"confs_anchor_{i}": ["accuracy"] for i in range(num_anchors)},
             **{f"bboxes_anchor_{i}": ["mae"] for i in range(num_anchors)},
             **{f"classes_anchor_{i}": ["accuracy"] for i in range(num_anchors)},
-            "card_type": ["accuracy"], 
-            # "cvv2": ["mae"], 
-            # "exp_date": ["mae"],
+            # "card_type": ["accuracy"], 
+            # **{f"cvv2_digit_{i}": ["accuracy"] for i in range(4)}, 
+            # **{f"exp_date_digit_{i}": ["accuracy"] for i in range(8)}, 
         },
         loss_weights={
             **{f"confs_anchor_{i}": 1. for i in range(num_anchors)},
             **{f"bboxes_anchor_{i}": 1. for i in range(num_anchors)},
             **{f"classes_anchor_{i}": 1. for i in range(num_anchors)},
-            "card_type": 0.5,
-            # "cvv2": 1.,
-            # "exp_date": 1.,
+            # "card_type": 0.1,
+            # **{f"cvv2_digit_{i}": 0.5 for i in range(4)}, 
+            # **{f"exp_date_digit_{i}": 0.5 for i in range(8)}, 
         },
     )
 
 
     return model
+
+
+def load_model(model_path=model_path):
+    return models.load_model(model_path, custom_objects={"OCRModel": OCRModel})
 
 

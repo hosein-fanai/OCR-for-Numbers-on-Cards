@@ -184,9 +184,14 @@ def detect_and_crop_card(image_path):
 def predict(img, model):
     results = model.predict(img[None])
 
-    card_type = results["card_type"][0][0]
-    # cvv2 = int(results["cvv2"][0][0] * 1e4)
-    # exp_date = int(results["exp_date"][0][0] * 1e8)
+    card_type = results.get("card_type", -1)
+    cvv2 = results.get("cvv2", -1)
+    exp_date = results.get("exp_date", -1)
+
+    card_type = card_type[0][0] if card_type!=-1 else card_type
+    cvv2 = cvv2[0][0] if cvv2!=-1 else cvv2
+    exp_date = exp_date[0][0] if exp_date!=-1 else exp_date
+
 
     found_conf, found_bboxes, found_classes = [], [], []
     for i in range(window_size[0]):
@@ -207,7 +212,7 @@ def predict(img, model):
                     found_bboxes.append(denormed_bbox)
                     found_classes.append(cls.argmax(axis=-1))
 
-    return found_conf, found_bboxes, found_classes, card_type, 0, 0 # cvv2, exp_date
+    return found_conf, found_bboxes, found_classes, card_type, cvv2, exp_date
 
 
 def predict_and_show(model, img_path, crop=False):

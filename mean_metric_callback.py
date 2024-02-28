@@ -7,12 +7,12 @@ from constants import num_anchors
 
 class MeanMetricCallback(callbacks.Callback):
     
-    def __init__(self, metric_name, metric_types):
+    def __init__(self, metric_name, metric_types, post_name="anchor", metric_num=num_anchors):
         super(MeanMetricCallback, self).__init__()
         self.metric_name = metric_name
         self.metric_types = metric_types
 
-        self.metrics_list = [[f"{self.metric_name}_anchor_{i}_{type_}" for i in range(num_anchors)]\
+        self.metrics_list = [[f"{self.metric_name}_{post_name}_{i}_{type_}" for i in range(metric_num)]\
                                                                          for type_ in metric_types]
 
     def on_epoch_end(self, epoch, logs=None):

@@ -5,33 +5,38 @@ from mean_metric_callback import MeanMetricCallback
 from constants import model_path, monitor_metric, log_dir
 
 
-callback_list = [
-    MeanMetricCallback(metric_name="confs", metric_types=["loss", "accuracy"]),
-    MeanMetricCallback(metric_name="bboxes", metric_types=["loss", "mae"]),
-    MeanMetricCallback(metric_name="classes", metric_types=["loss", "accuracy"]),
-    callbacks.ModelCheckpoint(
-        model_path, 
-        monitor=monitor_metric, 
-        save_best_only=True, 
-        min_delta=0.0,
-        verbose=0,
-    ),
-    callbacks.EarlyStopping(
-        monitor=monitor_metric,
-        patience=10,
-        min_delta=1e-4,
-        verbose=1,
-    ),
-    callbacks.ReduceLROnPlateau(
-        monitor=monitor_metric,
-        factor=0.5,
-        patience=3,
-        verbose=0,
-    ),
-    callbacks.TensorBoard(
-        log_dir=log_dir,
-        write_graph=False,
-    ),
-]
+def get_callbacks_list():
+    callbacks_list = [
+        MeanMetricCallback(metric_name="confs", metric_types=["loss", "accuracy"]),
+        MeanMetricCallback(metric_name="bboxes", metric_types=["loss", "mae"]),
+        MeanMetricCallback(metric_name="classes", metric_types=["loss", "accuracy"]),
+        # MeanMetricCallback(metric_name="cvv2", metric_types=["loss", "accuracy"], post_name="digit", metric_num=4),
+        # MeanMetricCallback(metric_name="exp_date", metric_types=["loss", "accuracy"], post_name="digit", metric_num=8),
+        callbacks.ModelCheckpoint(
+            model_path, 
+            monitor=monitor_metric, 
+            save_best_only=True, 
+            min_delta=0.0,
+            verbose=0,
+        ),
+        callbacks.EarlyStopping(
+            monitor=monitor_metric,
+            patience=10,
+            min_delta=1e-3,
+            verbose=1,
+        ),
+        callbacks.ReduceLROnPlateau(
+            monitor=monitor_metric,
+            factor=0.5,
+            patience=3,
+            verbose=0,
+        ),
+        callbacks.TensorBoard(
+            log_dir=log_dir,
+            write_graph=False,
+        ),
+    ]
+
+    return callbacks_list
 
 

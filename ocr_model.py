@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import models, losses
 
-from constants import class_weights_obj, num_classes
+from constants import num_classes # , class_weights_obj
 
 
 class OCRModel(models.Model):
@@ -14,20 +14,23 @@ class OCRModel(models.Model):
             if not self.compiled_loss.built:
                 self.compiled_loss.build(predictions)
             
-            total_loss = self.losses
+            total_loss = tf.reduce_sum(self.losses)
             for output_name, loss_fn_name in self.loss.items():
                 loss_fn = losses.get(loss_fn_name)
 
                 if "bboxes_anchor_" in output_name:
                     anchor_index = int(output_name[-1])
-                    masks = tf.tile(targets[f"confs_anchor_{anchor_index}"][..., None], [1, 1, 1, 4])
+                    masks = tf.tile(targets[f"confs_anchor_{anchor_index}"], [1, 1, 1, 4])
                     loss = loss_fn(targets[output_name], predictions[output_name] * masks)
-                    loss *= masks[..., 0] * class_weights_obj
+                    # loss *= masks * class_weights_obj # needs to be done before the aggregation of loss function
                 elif "classes_anchor_" in output_name:
                     anchor_index = int(output_name[-1])
-                    masks = tf.tile(targets[f"confs_anchor_{anchor_index}"][..., None], [1, 1, 1, num_classes])
+                    masks = tf.tile(targets[f"confs_anchor_{anchor_index}"], [1, 1, 1, num_classes])
                     loss = loss_fn(targets[output_name], predictions[output_name] * masks)
-                    loss *= masks[..., 0] * class_weights_obj
+                    # loss *= masks * class_weights_obj
+                elif "confs_anchor_" in output_name:
+                    loss = loss_fn(targets[output_name], predictions[output_name])
+                    # loss *= masks * class_weights_obj
                 else:
                     loss = loss_fn(targets[output_name], predictions[output_name])
 
@@ -44,5 +47,4 @@ class OCRModel(models.Model):
         metrics_dict = {m.name: m.result() for m in self.metrics}
 
         return metrics_dict
-
 
