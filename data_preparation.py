@@ -9,7 +9,7 @@ from utilities import read_annotation, calculate_corresponding_window, convert_b
 
 
 def extract_annotation(annot_path):
-    classes, bboxes, card_type, *info = read_annotation(os.path.join(trainset_path, "annotations", annot_path))
+    classes, bboxes, card_type, cvv2, exp_date = read_annotation(os.path.join(trainset_path, "annotations", annot_path))
 
     confs = np.zeros((*window_size, 1*num_anchors), dtype="float32")
     normed_windowed_bboxes = {f"bboxes_anchor_{i}": np.zeros((*window_size, 4), dtype="float32") for i in range(num_anchors)}
@@ -36,14 +36,15 @@ def extract_annotation(annot_path):
     classes_list = [classes_dict[key] for key in classes_dict.keys()]
     normed_windowed_bboxes_list = [normed_windowed_bboxes[key] for key in normed_windowed_bboxes.keys()]
 
-    # cvv2, exp_date = info
-    # cvv2 = [int(digit) for digit in cvv2]
-    # exp_date = [int(digit) for digit in exp_date]
-    # if len(exp_date) < 8:
-    #     exp_date = [0, 0, 0, 0] + exp_date
-    # info = cvv2, exp_date
+    cvv2 = [int(digit) for digit in cvv2]
+    if len(cvv2)==1:
+        cvv2 = [0]*4
+    
+    exp_date = [int(digit) for digit in exp_date]
+    if len(exp_date)==4:
+        exp_date = [0]*4 + exp_date
 
-    return confs, normed_windowed_bboxes_list, classes_list, card_type, info
+    return confs, normed_windowed_bboxes_list, classes_list, card_type, cvv2, exp_date
 
 
 def create_annotation_lists(annotation_paths, parallelize=True):
@@ -51,7 +52,8 @@ def create_annotation_lists(annotation_paths, parallelize=True):
     bboxes_list  = []
     all_classes_list = []
     card_types_list  = []
-    infos_list  = []
+    cvv2s_list  = []
+    exp_dates_list = []
 
     if parallelize:
         print(f"Creating a pool of {num_processes} processes for {len(annotation_paths)} files.")
@@ -61,32 +63,34 @@ def create_annotation_lists(annotation_paths, parallelize=True):
         pool.close()
         pool.join()
 
-        print(f"Closed the pool. Saving the results ...")
+        print("Closed the pool. Saving the results ...")
 
         for result in results:
-            confs, normed_windowed_bboxes_list, classes_list, card_type, info = result
+            confs, normed_windowed_bboxes_list, classes_list, card_type, cvv2, exp_date= result
+
             confs_list.append(confs)
             bboxes_list.append(normed_windowed_bboxes_list)
             all_classes_list.append(classes_list)
             card_types_list.append(np.array(card_type, dtype="uint8")[None])
-            infos_list.append(info)
-
+            cvv2s_list.append(cvv2)
+            exp_dates_list.append(exp_date)
     else:
         for i, annot_path in enumerate(annotation_paths):
             print(f"\rAnnotation file#: {i}", end="")
 
-            confs, normed_windowed_bboxes_list, classes_list, card_type, info = extract_annotation(annot_path)
+            confs, normed_windowed_bboxes_list, classes_list, card_type, cvv2, exp_date = extract_annotation(annot_path)
         
             confs_list.append(confs)
             bboxes_list.append(normed_windowed_bboxes_list)
             all_classes_list.append(classes_list)
             card_types_list.append(np.array(card_type, dtype="uint8")[None])
-            infos_list.append(info)
+            cvv2s_list.append(cvv2)
+            exp_dates_list.append(exp_date)
 
         print()
 
     print()
 
-    return confs_list, bboxes_list, all_classes_list, card_types_list, infos_list
+    return confs_list, bboxes_list, all_classes_list, card_types_list, cvv2s_list, exp_dates_list
 
 

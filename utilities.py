@@ -136,7 +136,7 @@ def read_annotation(annot_path):
         lines = file.read().split('\n')
 
     info = lines[0].split(' ')
-    card_type, cvv2, exp_date = int(info[0]), int(info[1]), int(info[2])
+    card_type, cvv2, exp_date = int(info[0]), info[1], info[2]
     
     classes = []
     bboxes = []

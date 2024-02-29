@@ -19,6 +19,9 @@ reg_coef = 4e-4
 dropout_rate = 0.5
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
+train_with_masks = False
+training_phase_2 = True
+
 threshold_conf = 0.5
 # threshold_nms = 0.5
 
