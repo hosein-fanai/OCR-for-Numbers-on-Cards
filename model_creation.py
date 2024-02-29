@@ -3,7 +3,9 @@ from tensorflow.keras import layers, models, optimizers, applications
 from tensorflow.keras import backend as K
 
 from ocr_model import OCRModel
-from constants import input_shape, dropout_rate, num_anchors, num_classes, model_name, lr, reg_coef, model_path, train_with_masks, training_phase_2
+from constants import (input_shape, dropout_rate, num_anchors, num_classes, 
+                    model_name, lr, reg_coef, model_path, train_with_masks, 
+                    training_phase_2, lr_phase_2)
 
 
 def load_model(model_path=model_path):
@@ -80,7 +82,7 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
     if training_phase_2:
         assert prev_model_path, "Didn't get the path to the previous model (the model for phase 1)."
 
-        learning_rate = lr / 5e2
+        learning_rate = lr_phase_2
 
         prev_model = load_model(prev_model_path)
         for layer in model.layers:
