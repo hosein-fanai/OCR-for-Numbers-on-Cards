@@ -185,12 +185,12 @@ def predict(img, model):
     results = model.predict(img[None])
 
     card_type = results.get("card_type", -1)
-    cvv2 = [results.get(f"cvv2_digit_{i}", -1) for i in range(4)]
-    exp_date = [results.get(f"exp_date_digit_{i}", -1) for i in range(8)]
+    cvv2 = [results.get(f"cvv2_digit_{i}", None) for i in range(4)]
+    exp_date = [results.get(f"exp_date_digit_{i}", None) for i in range(8)]
 
     card_type = card_type[0][0] if card_type!=-1 else card_type
-    cvv2 = "".join([digit[0].numpy().argmax() for digit in cvv2]) if cvv2!=[-1]*4 else -1
-    exp_date = "".join([digit[0].numpy().argmax() for digit in exp_date]) if exp_date!=[-1]*8 else -1
+    cvv2 = "".join([str(digit[0].argmax()) for digit in cvv2]) if cvv2[0] is not None else -1
+    exp_date = "".join([str(digit[0].argmax()) for digit in exp_date]) if exp_date[0] is not None else -1
 
     found_conf, found_bboxes, found_classes = [], [], []
     for i in range(window_size[0]):
