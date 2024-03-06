@@ -13,8 +13,8 @@ def plot_history(history):
     train_classes_acc = history["classes_accuracy"]
     val_classes_acc = history["val_classes_accuracy"]
 
-    train_bboxes_mae = history["bboxes_mae"]
-    val_bboxes_mae = history["val_bboxes_mae"]
+    train_bboxes_mae = history["bboxes_loss"]
+    val_bboxes_mae = history["val_bboxes_loss"]
 
     train_card_type_acc = history.get("card_type_accuracy", [0]*len(history["loss"]))
     val_card_type_acc = history.get("val_card_type_accuracy", [0]*len(history["loss"]))

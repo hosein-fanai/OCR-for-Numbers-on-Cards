@@ -15,29 +15,30 @@ num_classes = 10
 
 batch_size = 64
 lr = 1e-3
-reg_coef = 4e-4
-dropout_rate = 0.5
+lr_phase_2 = lr / 1e1
+reg_coef = 8e-4
+dropout_rate = 0.4
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
 train_with_masks = False
-training_phase_2 = True
+training_phase_2 = False
 
 threshold_conf = 0.5
 # threshold_nms = 0.5
 
-num_generating = 100_000
+num_generating = 200_000
 generating_index = 0
 
 num_processes = multiprocessing.cpu_count()
 
-num_generating_ID = int(num_generating // 3)
-num_generating_credit = int(num_generating // (3/2))
-num_generating_en = int(num_generating_credit // 2)
+num_generating_ID = num_generating // 4
+num_generating_credit = num_generating - num_generating_ID
+num_generating_en = num_generating_credit // 2
 
 runtime_id = time.asctime().replace(":", "-")
 
 log_dir = "./logs/" + runtime_id
-monitor_metric = "val_bboxes_mae"
+monitor_metric = "val_bboxes_loss"
 
 model_name = "sliding_window_ocr_model"
 model_path = "./models/" + model_name + "_" + runtime_id + ".h5"

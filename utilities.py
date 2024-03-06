@@ -197,7 +197,7 @@ def predict(img, model):
         for j in range(window_size[1]):
             for k in range(num_anchors):
                 conf = results[f"confs_anchor_{k}"][0][i, j, 0]
-                if conf >= threshold_conf:
+                if conf > threshold_conf:
                     cls = results[f"classes_anchor_{k}"][0][i, j]
                     bbox = results[f"bboxes_anchor_{k}"][0][i, j]
 
