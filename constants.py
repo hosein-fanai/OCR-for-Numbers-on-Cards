@@ -2,6 +2,8 @@ import multiprocessing
 
 import time
 
+import os
+
 
 input_shape = (200, 320, 3)
 
@@ -52,4 +54,9 @@ testset_path = "./dataset/testset"
 nums_en = list("0123456789")
 nums_per = list("۰۱۲۳۴۵۶۷۸۹")
 
+os.makedirs(os.path.join(trainset_path, "images"), exist_ok=True)
+os.makedirs(os.path.join(trainset_path, "annotations"), exist_ok=True)
+os.makedirs(testset_path, exist_ok=True)
+os.makedirs("./logs", exist_ok=True)
+os.makedirs("./models/plots", exist_ok=True)
 

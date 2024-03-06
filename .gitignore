@@ -4,8 +4,6 @@ __pycache__
 dataset
 models
 
-templates
-
 *.pdf
 *.docx
 *.zip
