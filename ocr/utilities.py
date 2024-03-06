@@ -6,7 +6,7 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 
-from constants import input_shape, window_size, num_anchors, threshold_conf, convert_bboxes_to_relative_bboxes
+from ocr.constants import input_shape, window_size, num_anchors, threshold_conf, convert_bboxes_to_relative_bboxes
 
 
 def read_img(img_path):

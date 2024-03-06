@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import models, losses
 
-from constants import num_classes # , class_weights_obj
+from ocr.constants import num_classes # , class_weights_obj
 
 
 class OCRModel(models.Model):

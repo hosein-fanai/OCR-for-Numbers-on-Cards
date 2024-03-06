@@ -6,8 +6,8 @@ import os
 
 import random
 
-from constants import input_shape, trainset_path, nums_per, nums_en, template_path, num_processes, generating_index
-from utilities import normalize_bbox
+from ocr.constants import input_shape, trainset_path, nums_per, nums_en, template_path, num_processes, generating_index
+from ocr.utilities import normalize_bbox
 
 
 def generate_fake_credit_info(lang="english"):

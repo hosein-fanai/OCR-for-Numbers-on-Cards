@@ -2,7 +2,7 @@ from tensorflow.keras import callbacks
 
 import numpy as np
 
-from constants import num_anchors
+from ocr.constants import num_anchors
 
 
 class MeanMetricCallback(callbacks.Callback):

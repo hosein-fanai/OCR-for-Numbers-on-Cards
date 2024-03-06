@@ -2,9 +2,9 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers, applications
 from tensorflow.keras import backend as K
 
-from ocr_model import OCRModel
+from ocr.ocr_model import OCRModel
 
-from constants import (input_shape, dropout_rate, num_anchors, num_classes, 
+from ocr.constants import (input_shape, dropout_rate, num_anchors, num_classes, 
                     model_name, lr, reg_coef, model_path, train_with_masks, 
                     training_phase_2, lr_phase_2)
 

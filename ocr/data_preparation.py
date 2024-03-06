@@ -4,8 +4,8 @@ import multiprocessing
 
 import os
 
-from constants import input_shape, window_size, trainset_path, num_anchors, convert_bboxes_to_relative_bboxes, num_processes
-from utilities import read_annotation, calculate_corresponding_window, convert_bbox_to_relative_bbox, calculate_corresponding_anchor
+from ocr.constants import input_shape, window_size, trainset_path, num_anchors, convert_bboxes_to_relative_bboxes, num_processes
+from ocr.utilities import read_annotation, calculate_corresponding_window, convert_bbox_to_relative_bbox, calculate_corresponding_anchor
 
 
 def extract_annotation(annot_path):
