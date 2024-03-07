@@ -18,11 +18,11 @@ num_classes = 10
 batch_size = 64
 lr = 1e-3
 lr_phase_2 = lr / 1e1
-reg_coef = 8e-4
-dropout_rate = 0.4
+reg_coef = 4e-4
+dropout_rate = 0.15
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
-train_with_masks = False
+train_with_masks = True
 training_phase_2 = False
 
 threshold_conf = 0.5

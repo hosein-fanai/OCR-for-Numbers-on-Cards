@@ -48,3 +48,4 @@ class OCRModel(models.Model):
 
         return metrics_dict
 
+
