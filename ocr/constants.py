@@ -23,7 +23,7 @@ dropout_rate = 0.15
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
 train_with_masks = True
-training_phase_2 = False
+training_phase_2 = True
 
 threshold_conf = 0.5
 # threshold_nms = 0.5

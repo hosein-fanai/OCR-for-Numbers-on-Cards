@@ -38,16 +38,16 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
         z = layers.Dropout(dropout_rate)(z)
 
         z1 = layers.Dense(1024, activation="relu", name="bottleneck_cvv2_digits_dense_1")(z)
-        z1 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_1")(z1)
+        z1 = layers.Dropout(dropout_rate, name="bottleneck_cvv2_digits_do_1")(z1)
 
         z1 = layers.Dense(512, activation="relu", name="bottleneck_cvv2_digits_dense_2")(z1)
-        z1 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_2")(z1)
+        z1 = layers.Dropout(dropout_rate, name="bottleneck_cvv2_digits_do_2")(z1)
 
         z2 = layers.Dense(1024, activation="relu", name="bottleneck_exp_date_digits_dense_1")(z)
-        z2 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_1")(z2)
+        z2 = layers.Dropout(dropout_rate, name="bottleneck_exp_date_digits_do_1")(z2)
 
         z2 = layers.Dense(512, activation="relu", name="bottleneck_exp_date_digits_dense_2")(z2)
-        z2 = layers.Dropout(dropout_rate, name="bottleneck_digits_do_2")(z2)
+        z2 = layers.Dropout(dropout_rate, name="bottleneck_exp_date_digits_do_2")(z2)
 
         card_type = layers.Dense(1, activation="sigmoid", name="card_type")(z)
         cvv2_outputs = [layers.Dense(10, activation="softmax", name=f"cvv2_digit_{i}")(z1) for i in range(4)]
@@ -129,7 +129,7 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
             **{f"confs_anchor_{i}": 1. for i in range(num_anchors)},
             **{f"bboxes_anchor_{i}": 1. for i in range(num_anchors)},
             **{f"classes_anchor_{i}": 1. for i in range(num_anchors)}, 
-        } | ({"card_type": 0.1} if training_phase_2 else {} if training_phase_2 else {}) | \
+        } | ({"card_type": 0.05} if training_phase_2 else {} if training_phase_2 else {}) | \
             ({f"cvv2_digit_{i}": 0.1 for i in range(4)} if training_phase_2 else {}) | \
             ({f"exp_date_digit_{i}": 0.1 for i in range(8)} if training_phase_2 else {}), 
     )

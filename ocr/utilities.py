@@ -190,7 +190,8 @@ def predict(img, model):
 
     card_type = card_type[0][0] if card_type!=-1 else card_type
     cvv2 = "".join([str(digit[0].argmax()) for digit in cvv2]) if cvv2[0] is not None else -1
-    exp_date = "".join([str(digit[0].argmax()) for digit in exp_date]) if exp_date[0] is not None else -1
+    exp_date = "".join([str(digit[0].argmax()) if i not in (3, 5) else str(digit[0].argmax())+'/' \
+                for i, digit in enumerate(exp_date)]) if exp_date[0] is not None else -1
 
     found_conf, found_bboxes, found_classes = [], [], []
     for i in range(window_size[0]):
