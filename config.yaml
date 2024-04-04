@@ -17,8 +17,8 @@ dropout_rate: 0.15
 
 use_data_aug: True
 
-train_with_masks: False
-training_phase_2: False
+train_with_masks: True
+training_phase_2: True
 
 training_phase_2_lr_divisor: 1e1
 
