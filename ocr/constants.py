@@ -15,7 +15,7 @@ convert_bboxes_to_relative_bboxes = True
 num_anchors = 10
 num_classes = 10
 
-batch_size = 64
+batch_size = 128
 lr = 1e-3
 lr_phase_2 = lr / 1e1
 reg_coef = 4e-4
