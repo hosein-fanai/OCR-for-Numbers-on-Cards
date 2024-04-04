@@ -90,7 +90,7 @@ def generate_fake_card(template_path, template_type, info, index):
     if template_type == 0:
         card_number, cvv2, exp_date = info 
 
-        font_type = ["arial.ttf", "calibri.ttf", "times.ttf"]
+        font_type = ["./fonts/arial.ttf", "./fonts/calibri.ttf", "./fonts/times.ttf"]
         random.shuffle(font_type)
 
         card_number_font_size = random.randint(10, 50)
@@ -152,7 +152,7 @@ def generate_fake_card(template_path, template_type, info, index):
     elif template_type == 1:
         ID, name, lname, b_date, fname, exp_date = info 
                     
-        font = ImageFont.truetype("calibri.ttf", 14)
+        font = ImageFont.truetype("./fonts/calibri.ttf", 14)
     
         ID_position = (0.58*input_shape[1], 0.25*input_shape[0])
         name_position = (0.68*input_shape[1], 0.35*input_shape[0])
