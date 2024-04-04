@@ -15,8 +15,10 @@ lr: 1e-3
 reg_coef: 4e-4
 dropout_rate: 0.15
 
-train_with_masks: True
-training_phase_2: True
+use_data_aug: True
+
+train_with_masks: False
+training_phase_2: False
 
 training_phase_2_lr_divisor: 1e1
 

@@ -27,6 +27,8 @@ reg_coef = float(configs["reg_coef"])
 dropout_rate = configs["dropout_rate"]
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
+use_data_aug = configs["use_data_aug"]
+
 train_with_masks = configs["train_with_masks"]
 training_phase_2 = configs["training_phase_2"]
 

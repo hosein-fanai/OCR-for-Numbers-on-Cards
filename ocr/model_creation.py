@@ -4,9 +4,9 @@ from tensorflow.keras import backend as K
 
 from ocr.ocr_model import OCRModel
 
-from ocr.constants import (input_shape, dropout_rate, num_anchors, num_classes, 
-                    model_name, lr, reg_coef, model_path, train_with_masks, 
-                    training_phase_2, lr_phase_2)
+from ocr.constants import (input_shape, dropout_rate, use_data_aug, num_anchors, 
+                    num_classes, model_name, lr, reg_coef, model_path, 
+                    train_with_masks, training_phase_2, lr_phase_2)
 
 
 def load_model(model_path=model_path):
@@ -22,16 +22,16 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
         layer.trainable = False
 
     input_image = layers.Input(shape=input_shape, dtype=tf.uint8, name="image")
+    x = input_image
 
-    x = models.Sequential([
-        layers.RandomBrightness(0.5),
-        layers.RandomContrast(0.5),
-    ], name="data_augmentation")(input_image)
+    if use_data_aug:
+        x = models.Sequential([
+            layers.RandomBrightness(0.5),
+            layers.RandomContrast(0.5),
+        ], name="data_augmentation")(x)
 
-    x = layers.Lambda(lambda X: applications.xception.preprocess_input(X), name="xception_preprocess")(x)
-
+    x = layers.Lambda(lambda X: applications.xception.preprocess_input(tf.cast(X, tf.float32)), name="xception_preprocess")(x)
     x = conv_base(x)
-
 
     if training_phase_2:
         z = layers.GlobalAveragePooling2D()(x)
@@ -52,7 +52,6 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
         card_type = layers.Dense(1, activation="sigmoid", name="card_type")(z)
         cvv2_outputs = [layers.Dense(10, activation="softmax", name=f"cvv2_digit_{i}")(z1) for i in range(4)]
         exp_date_outputs = [layers.Dense(10, activation="softmax", name=f"exp_date_digit_{i}")(z2) for i in range(8)]
-
 
     x = layers.MaxPooling2D()(x)
     x = layers.Dropout(dropout_rate)(x)
