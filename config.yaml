@@ -1,0 +1,32 @@
+input_shape: 
+  200
+  320
+  3
+
+num_poolings: 6
+
+convert_bboxes_to_relative_bboxes: True
+
+num_anchors: 10
+num_classes: 10
+
+batch_size: 128
+lr: 1e-3
+reg_coef: 4e-4
+dropout_rate: 0.15
+
+train_with_masks: True
+training_phase_2: True
+
+training_phase_2_lr_divisor: 1e1
+
+threshold_conf: 0.5
+threshold_nms: 0.5
+
+num_generating: 200_000
+generating_index: 0
+
+monitor_metric: "val_bboxes_loss"
+
+model_name: "sliding_window_ocr_model"
+

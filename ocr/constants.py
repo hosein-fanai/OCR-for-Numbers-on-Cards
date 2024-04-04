@@ -1,3 +1,5 @@
+import yaml
+
 import multiprocessing
 
 import time
@@ -5,31 +7,34 @@ import time
 import os
 
 
-input_shape = (200, 320, 3)
+with open("./config.yaml") as stream:
+    configs = yaml.safe_load(stream)
 
-num_poolings = 6
+input_shape = tuple(int(dim) for dim in configs["input_shape"].split(' '))
+
+num_poolings = configs["num_poolings"]
 window_size = input_shape[0]//2**num_poolings, input_shape[1]//2**num_poolings
 
-convert_bboxes_to_relative_bboxes = True
+convert_bboxes_to_relative_bboxes = configs["convert_bboxes_to_relative_bboxes"]
 
-num_anchors = 10
-num_classes = 10
+num_anchors = configs["num_anchors"]
+num_classes = configs["num_classes"]
 
-batch_size = 128
-lr = 1e-3
-lr_phase_2 = lr / 1e1
-reg_coef = 4e-4
-dropout_rate = 0.15
+batch_size = configs["batch_size"]
+lr = float(configs["lr"])
+lr_phase_2 = lr / float(configs["training_phase_2_lr_divisor"])
+reg_coef = float(configs["reg_coef"])
+dropout_rate = configs["dropout_rate"]
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
 
-train_with_masks = True
-training_phase_2 = True
+train_with_masks = configs["train_with_masks"]
+training_phase_2 = configs["training_phase_2"]
 
-threshold_conf = 0.5
-# threshold_nms = 0.5
+threshold_conf = configs["threshold_conf"]
+# threshold_nms = configs["threshold_nms"]
 
-num_generating = 200_000
-generating_index = 0
+num_generating = configs["num_generating"]
+generating_index = configs["generating_index"]
 
 num_processes = multiprocessing.cpu_count()
 
@@ -40,9 +45,9 @@ num_generating_en = num_generating_credit // 2
 runtime_id = time.asctime().replace(":", "-")
 
 log_dir = "./logs/" + runtime_id
-monitor_metric = "val_bboxes_loss"
+monitor_metric = configs["monitor_metric"]
 
-model_name = "sliding_window_ocr_model"
+model_name = configs["model_name"]
 model_path = "./models/" + model_name + "_" + runtime_id + ".h5"
 model_plot_path = "./models/plots/" + model_name + "_" + runtime_id + ".png"
 
