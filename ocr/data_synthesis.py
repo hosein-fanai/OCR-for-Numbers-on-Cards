@@ -6,7 +6,10 @@ import os
 
 import random
 
-from ocr.constants import input_shape, trainset_path, nums_per, nums_en, template_path, num_processes, generating_index
+from ocr.constants import (input_shape, trainset_path, nums_per, nums_en, template_path, 
+                            num_processes, generating_index, do_generate, do_generate_en_cards,
+                            do_generate_per_cards, do_generate_national_ID_cards, num_generating_en, 
+                            num_generating_ID)
 from ocr.utilities import normalize_bbox
 
 
@@ -218,7 +221,7 @@ def generate_image(temp_full_path, template_type, index):
 def generate_multiple_images(temp_path, num_steps, gene_type, print_message="Generating images"):
     global generating_index
 
-    print(f"{print_message} from {temp_path} with {num_processes} ...")
+    print(f"{print_message} from {temp_path} with {num_processes} processes ...")
     temp_full_path = os.path.join(template_path, "national ID" if gene_type == 1 else "credit", temp_path)
 
     pool = multiprocessing.Pool(processes=num_processes)
@@ -233,5 +236,75 @@ def generate_multiple_images(temp_path, num_steps, gene_type, print_message="Gen
 
     generating_index += num_steps
     print(f"The last generating index is: {generating_index-1}")
+    print()
+
+
+def generate_whole_dataset():
+    if not do_generate:
+        print("do_generate flag is set to False in config.yaml")
+        return
+
+    templates_type0 = os.listdir(template_path+"/credit")
+    templates_type1 = os.listdir(template_path+"/national ID")
+    type0_num = len(templates_type0)
+    type1_num = len(templates_type1)
+    num_generating_en_each_temp = num_generating_en // type0_num
+    num_generating_ID_each_temp = num_generating_ID // type1_num
+
+    print("="*100)
+
+    print('*'+f"Found #{type0_num} template(s) for credit cards.".center(98, ' ')+'*')
+    print('*'+f"Found #{type1_num} template(s) for national-ID cards.".center(98, ' ')+'*')
+    print('*'+''.center(98, ' ')+'*')
+
+    print('*'+f"English-numbered credit card generating no.: #{num_generating_en}, permission to generate: {do_generate_en_cards}".center(98, ' ')+'*')
+    print('*'+f"Persian-numbered credit card generating no.: #{num_generating_en}, permission to generate: {do_generate_per_cards}".center(98, ' ')+'*')
+    print('*'+f"National-ID card generating no.: #{num_generating_ID}, permission to generate: {do_generate_national_ID_cards}".center(98, ' ')+'*')
+    print('*'+''.center(98, ' ')+'*')
+
+    print('*'+f"The initial generating index is {generating_index}".center(98, ' ')+'*')
+    print('*'+''.center(98, ' ')+'*')
+
+    print("="*100)
+    print('*'+''.center(98, ' ')+'*')
+    print("="*100)
+    if do_generate_en_cards:
+        for temp_path in templates_type0:
+            generate_multiple_images(
+                temp_path, 
+                num_steps=num_generating_en_each_temp, 
+                gene_type=0, 
+                print_message=f"* Generating {num_generating_en_each_temp} new english-numbered, credit-card image",
+            )
+    
+    print("="*100)
+    print('*'+''.center(98, ' ')+'*')
+    print("="*100)
+    if do_generate_per_cards:
+        for temp_path in templates_type0:
+            generate_multiple_images(
+                temp_path, 
+                num_steps=num_generating_en_each_temp, 
+                gene_type=0.5, 
+                print_message=f"* Generating {num_generating_en_each_temp} new persian-numbered, credit-card image",
+            )
+    
+    print("="*100)
+    print('*'+''.center(98, ' ')+'*')
+    print("="*100)
+    if do_generate_national_ID_cards:
+        for temp_path in templates_type1:
+            generate_multiple_images(
+                temp_path, 
+                num_steps=num_generating_ID_each_temp, 
+                gene_type=1, 
+                print_message=f"* Generating {num_generating_ID_each_temp} new national-ID image",
+            )
+    
+    print("="*100)
+    print('*'+''.center(98, ' ')+'*')
+    print("="*100)
+
+    return templates_type0, templates_type1
 
 

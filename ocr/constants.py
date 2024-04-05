@@ -37,6 +37,10 @@ threshold_conf = configs["threshold_conf"]
 
 num_generating = configs["num_generating"]
 generating_index = configs["generating_index"]
+do_generate = configs["do_generate"]
+do_generate_en_cards = configs["do_generate_en_cards"]
+do_generate_per_cards = configs["do_generate_per_cards"]
+do_generate_national_ID_cards = configs["do_generate_national_ID_cards"]
 
 num_processes = multiprocessing.cpu_count()
 

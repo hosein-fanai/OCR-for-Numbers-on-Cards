@@ -27,6 +27,10 @@ threshold_nms: 0.5
 
 num_generating: 200_000
 generating_index: 0
+do_generate: True
+do_generate_en_cards: True
+do_generate_per_cards: True
+do_generate_national_ID_cards: True
 
 monitor_metric: "val_bboxes_loss"
 
