@@ -10,6 +10,11 @@ import os
 with open("./config.yaml") as stream:
     configs = yaml.safe_load(stream)
 
+    print("* Initializing constants of the project according to ./config.yaml")
+    print('*')
+    print("* Loaded configs from the file are:")
+    print(configs)
+
 input_shape = tuple(int(dim) for dim in configs["input_shape"].split(' '))
 
 num_poolings = configs["num_poolings"]
