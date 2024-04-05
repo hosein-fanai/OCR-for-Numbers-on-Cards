@@ -1,12 +1,13 @@
 import tensorflow as tf 
 from tensorflow.keras import layers, models, optimizers, applications
 from tensorflow.keras import backend as K
+from tensorflow.keras import utils
 
 from ocr.ocr_model import OCRModel
 
-from ocr.constants import (input_shape, dropout_rate, use_data_aug, num_anchors, 
-                    num_classes, model_name, lr, reg_coef, model_path, 
-                    train_with_masks, training_phase_2, lr_phase_2)
+from ocr.init import (input_shape, dropout_rate, use_data_aug, num_anchors, num_classes, 
+                    model_name, lr, reg_coef, model_path, train_with_masks, training_phase_2, 
+                    lr_phase_2, model_plot_path)
 
 
 def load_model(model_path=model_path):
@@ -135,5 +136,14 @@ def create_sliding_window_ocr_model(prev_model_path=None, layers_to_freeze=[]):
 
 
     return model
+
+
+def plot_model(model):
+    return utils.plot_model(
+        model,
+        to_file=model_plot_path,
+        show_shapes=True,
+        show_layer_names=True,
+    )
 
 

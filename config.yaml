@@ -15,6 +15,8 @@ lr: 1e-3
 reg_coef: 4e-4
 dropout_rate: 0.15
 
+validation_split: 0.15
+
 use_data_aug: True
 
 train_with_masks: True
@@ -35,4 +37,8 @@ do_generate_national_ID_cards: True
 monitor_metric: "val_bboxes_loss"
 
 model_name: "sliding_window_ocr_model"
+
+random_seed: 42
+
+gpu_memory_limit: 6144
 

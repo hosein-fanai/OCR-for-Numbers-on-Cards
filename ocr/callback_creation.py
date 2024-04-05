@@ -2,7 +2,7 @@ from tensorflow.keras import callbacks
 
 from ocr.mean_metric_callback import MeanMetricCallback
 
-from ocr.constants import training_phase_2, model_path, monitor_metric, log_dir
+from ocr.init import training_phase_2, model_path, monitor_metric, log_dir
 
 
 def get_callbacks_list():

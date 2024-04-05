@@ -4,9 +4,18 @@ from PIL import Image
 
 import numpy as np
 
+import os
+
 from matplotlib import pyplot as plt
 
-from ocr.constants import input_shape, window_size, num_anchors, threshold_conf, convert_bboxes_to_relative_bboxes
+from ocr.init import trainset_path, input_shape, window_size, num_anchors, threshold_conf, convert_bboxes_to_relative_bboxes
+
+
+def get_trainset_paths():
+    trainset_images = [os.path.join(trainset_path, "images", path) for path in os.listdir(os.path.join(trainset_path, "images"))]
+    trainset_annotations = [os.path.join(trainset_path, "annotations", path) for path in os.listdir(os.path.join(trainset_path, "annotations"))]
+
+    return trainset_images, trainset_annotations
 
 
 def read_img(img_path):

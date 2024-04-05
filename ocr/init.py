@@ -1,3 +1,6 @@
+import tensorflow as tf 
+from tensorflow.keras import utils
+
 import yaml
 
 import multiprocessing
@@ -31,6 +34,8 @@ lr_phase_2 = lr / float(configs["training_phase_2_lr_divisor"])
 reg_coef = float(configs["reg_coef"])
 dropout_rate = configs["dropout_rate"]
 # class_weights_obj = 1. # float(window_size[0] * window_size[1])
+
+validation_split = configs["validation_split"]
 
 use_data_aug = configs["use_data_aug"]
 
@@ -76,3 +81,17 @@ os.makedirs(testset_path, exist_ok=True)
 os.makedirs("./logs", exist_ok=True)
 os.makedirs("./models/plots", exist_ok=True)
 
+random_seed = configs["random_seed"]
+random_seed = random_seed if random_seed is not None else 0
+utils.set_random_seed(random_seed)
+
+mem_lim = configs["gpu_memory_limit"]
+if mem_lim and (gpus:=tf.config.list_physical_devices("GPU")):
+    try:
+        tf.config.set_logical_device_configuration(gpus[0],
+            [tf.config.LogicalDeviceConfiguration(memory_limit=6144)])
+    except RuntimeError as e:
+        print(e)
+        print("Could not limit gpu memory.")
+
+print("* Initiation done.")

@@ -1,15 +1,17 @@
+import tensorflow as tf
+
+from sklearn.model_selection import train_test_split
+
 import numpy as np
 
 import multiprocessing
 
-import os
-
-from ocr.constants import input_shape, window_size, trainset_path, num_anchors, convert_bboxes_to_relative_bboxes, num_processes
-from ocr.utilities import read_annotation, calculate_corresponding_window, convert_bbox_to_relative_bbox, calculate_corresponding_anchor
+from ocr.init import input_shape, window_size, num_anchors, convert_bboxes_to_relative_bboxes, num_processes, training_phase_2, batch_size, validation_split
+from ocr.utilities import read_annotation, calculate_corresponding_window, convert_bbox_to_relative_bbox, calculate_corresponding_anchor, get_trainset_paths
 
 
 def extract_annotation(annot_path):
-    classes, bboxes, card_type, cvv2, exp_date = read_annotation(os.path.join(trainset_path, "annotations", annot_path))
+    classes, bboxes, card_type, cvv2, exp_date = read_annotation(annot_path)
 
     confs = np.zeros((*window_size, 1*num_anchors), dtype="float32")
     normed_windowed_bboxes = {f"bboxes_anchor_{i}": np.zeros((*window_size, 4), dtype="float32") for i in range(num_anchors)}
@@ -56,17 +58,17 @@ def create_annotation_lists(annotation_paths, parallelize=True):
     exp_dates_list = []
 
     if parallelize:
-        print(f"Creating a pool of {num_processes} processes for {len(annotation_paths)} files.")
+        print(f"\tCreating a pool of {num_processes} processes for {len(annotation_paths)} files.")
 
         pool = multiprocessing.Pool(processes=num_processes)
         results = pool.map(extract_annotation, annotation_paths)
         pool.close()
         pool.join()
 
-        print("Closed the pool. Saving the results ...")
+        print("\tClosed the pool. Saving the results ...")
 
         for result in results:
-            confs, normed_windowed_bboxes_list, classes_list, card_type, cvv2, exp_date= result
+            confs, normed_windowed_bboxes_list, classes_list, card_type, cvv2, exp_date = result
 
             confs_list.append(confs)
             bboxes_list.append(normed_windowed_bboxes_list)
@@ -92,5 +94,71 @@ def create_annotation_lists(annotation_paths, parallelize=True):
     print()
 
     return confs_list, bboxes_list, all_classes_list, card_types_list, cvv2s_list, exp_dates_list
+
+
+def split_dataset(trainset_images, trainset_annotations):
+    x_train, x_val, y_train, y_val = train_test_split(trainset_images, trainset_annotations, 
+                                                    test_size=validation_split, shuffle=True, 
+                                                    random_state=np.random.get_state()[1][0])
+
+    return x_train, x_val, y_train, y_val
+
+
+def create_pipeline(trainset_files, valset_files=None, prefetch=5):
+    x_train, train_extracted_annotation_lists = trainset_files
+    train_confs, train_bboxes, train_classes, train_card_types, train_cvv2s, train_exp_dates = train_extracted_annotation_lists
+
+    def preprocess_img_annot(img_path, confs, classes_list, bboxes, card_type, cvv2, exp_date):
+        x = tf.io.read_file(img_path)
+        x = tf.image.decode_image(x)
+
+        y = {
+            **{f"confs_anchor_{i}": confs[..., i, None] for i in range(num_anchors)}, 
+            **{f"bboxes_anchor_{i}": bboxes[i] for i in range(len(bboxes))}, 
+            **{f"classes_anchor_{i}": classes_list[i] for i in range(len(classes_list))}, 
+        } | ({"card_type": card_type} if training_phase_2 else {}) | \
+            ({f"cvv2_digit_{i}": cvv2[..., i] for i in range(4)} if training_phase_2 else {}) | \
+            ({f"exp_date_digit_{i}": exp_date[..., i] for i in range(8)} if training_phase_2 else {})
+        
+        return x, y
+
+    trainset = tf.data.Dataset.from_tensor_slices((x_train, train_confs, train_classes, train_bboxes, train_card_types, train_cvv2s, train_exp_dates))
+    trainset = trainset.map(preprocess_img_annot, num_parallel_calls=tf.data.AUTOTUNE)
+    trainset = trainset.shuffle(1_000).batch(batch_size).prefetch(prefetch)
+
+    if valset_files:
+        x_val, val_extracted_annotation_lists = valset_files
+        val_confs, val_bboxes, val_classes, val_card_types, val_cvv2s, val_exp_dates = val_extracted_annotation_lists
+
+        valset = tf.data.Dataset.from_tensor_slices((x_val, val_confs, val_classes, val_bboxes, val_card_types, val_cvv2s, val_exp_dates))
+        valset = valset.map(preprocess_img_annot, num_parallel_calls=tf.data.AUTOTUNE)
+        valset = valset.batch(batch_size).prefetch(prefetch)
+    else:
+        valset = None
+
+    return trainset, valset
+
+
+def create_dataset():
+    trainset_images, trainset_annotations = get_trainset_paths()
+    assert len(trainset_images) == len(trainset_annotations)
+    print(f"* Found {len(trainset_images)} images in trainset directory.")
+    print()
+
+    x_train, x_val, y_train, y_val = split_dataset()
+
+    print(f"* Splitted trainset images into two datasets: trainset #{len(x_train)}, validationset #{len(x_val)}")
+    print()
+
+    print("* Started the extraction of annotation files.")
+    train_extracted_annotation_lists = create_annotation_lists(y_train)
+    val_extracted_annotation_lists = create_annotation_lists(y_val)
+    print()
+
+    print("* Creating tf.data.Dataset pipeline for both train and validation data.")
+    trainset, valset = create_pipeline((x_train, train_extracted_annotation_lists), (x_val, val_extracted_annotation_lists))
+    print("* Successfully created the pipeline.")
+
+    return trainset, valset
 
 

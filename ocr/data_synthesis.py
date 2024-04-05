@@ -6,7 +6,7 @@ import os
 
 import random
 
-from ocr.constants import (input_shape, trainset_path, nums_per, nums_en, template_path, 
+from ocr.init import (input_shape, trainset_path, nums_per, nums_en, template_path, 
                             num_processes, generating_index, do_generate, do_generate_en_cards,
                             do_generate_per_cards, do_generate_national_ID_cards, num_generating_en, 
                             num_generating_ID)
